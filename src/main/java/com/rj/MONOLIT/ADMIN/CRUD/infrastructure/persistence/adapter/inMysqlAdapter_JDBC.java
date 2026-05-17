@@ -65,10 +65,10 @@ public class inMysqlAdapter_JDBC implements Crud_RepositoryPort {
     
     //region save simple, multi and import methods
     @Override
-    public Crud_Entity save_Crud_Entity_JDBC_SP (String typeBean,InsertUpdate_Crud_Model entity) {
+    public Crud_Entity save_Crud_Entity_JDBC_SP (InsertUpdate_Crud_Model entity) {
         JdbcTemplate currentTemplate = getDynamicJdbcTemplate();
         String sql = "{ call jbAPI_crud_insert(?,?,?,?) }";        
-        Optional<Crud_Entity> existingEntityOpt = find_Crud_Entity_JDBC_SP_ByName(typeBean,entity.name());
+        Optional<Crud_Entity> existingEntityOpt = find_Crud_Entity_JDBC_SP_ByName(entity.name());
         Crud_Entity newEntity = new Crud_Entity();
         if (existingEntityOpt.isPresent()) {
             throw new RuntimeException("El nombre '"+entity.name()+"' ya existe en la base de datos.");
@@ -94,7 +94,7 @@ public class inMysqlAdapter_JDBC implements Crud_RepositoryPort {
     }
 
     @Override
-    public List<Crud_multiReadModel> save_multi_Crud_Entity_JDBC_SP(String typeBean, List<InsertMulti_Crud_Model> entityList) {
+    public List<Crud_multiReadModel> save_multi_Crud_Entity_JDBC_SP(List<InsertMulti_Crud_Model> entityList) {
         JdbcTemplate currentTemplate = getDynamicJdbcTemplate();
         String sql = "{ call jbAPI_crud_insert_multi(?) }";
         ObjectMapper objectMapper = new ObjectMapper();
@@ -102,7 +102,7 @@ public class inMysqlAdapter_JDBC implements Crud_RepositoryPort {
             .filter(InsertMulti_Crud_Model::isValid)
             .map(item -> new Crud_Entity(null,item.name(),item.email(),null,null,null))
             .toList();
-        List<String> existingNames = find_Crud_Entity_JDBC_SP_ByNames(typeBean, SearchList)
+        List<String> existingNames = find_Crud_Entity_JDBC_SP_ByNames(SearchList)
                 .map(list -> list.stream()
                         .map(Crud_Entity::getName)
                         .collect(Collectors.toList()))
@@ -120,7 +120,7 @@ public class inMysqlAdapter_JDBC implements Crud_RepositoryPort {
                 return null;
             });
 
-            List<Crud_Entity> savedEntities = this.find_Crud_Entity_JDBC_SP_ByNames(typeBean, filteredEntities).orElseGet(ArrayList::new);
+            List<Crud_Entity> savedEntities = this.find_Crud_Entity_JDBC_SP_ByNames(filteredEntities).orElseGet(ArrayList::new);
             if(!savedEntities.isEmpty()) {
                 readmodel.addAll(savedEntities.stream()
                     .map(item -> new Crud_multiReadModel(item.getId(), item.getName(), item.getEmail(), item.getCreated(), item.getUpdated(), item.getState(), true, "Registro insertado correctamente"))
@@ -152,9 +152,9 @@ public class inMysqlAdapter_JDBC implements Crud_RepositoryPort {
 
     @Override
     @Transactional
-    public List<Crud_multiReadModel> save_import_Crud_Entity_JDBC_SP(String typeBean, List<InsertMulti_Crud_Model> entityList) {
+    public List<Crud_multiReadModel> save_import_Crud_Entity_JDBC_SP(List<InsertMulti_Crud_Model> entityList) {
         try{
-            return save_multi_Crud_Entity_JDBC_SP(typeBean, entityList);
+            return save_multi_Crud_Entity_JDBC_SP(entityList);
         }catch(Exception e){
             throw new RuntimeException(e.getMessage());
         }
@@ -163,7 +163,7 @@ public class inMysqlAdapter_JDBC implements Crud_RepositoryPort {
 
     //region find methods
     @Override
-    public List<Crud_Entity> findAll_Crud_entity_JDBC_SP(String typeBean) {
+    public List<Crud_Entity> findAll_Crud_entity_JDBC_SP() {
         JdbcTemplate currentTemplate = getDynamicJdbcTemplate();
         try{
             String sql = "{call jbAPI_crud_list()}";
@@ -184,7 +184,7 @@ public class inMysqlAdapter_JDBC implements Crud_RepositoryPort {
     }
 
     @Override
-    public Optional<Crud_Entity> find_Crud_Entity_JDBC_SP_ById(String typeBean,Long id) {
+    public Optional<Crud_Entity> find_Crud_Entity_JDBC_SP_ById(Long id) {
         JdbcTemplate currentTemplate = getDynamicJdbcTemplate();
         try{
             String sql = "{call jbAPI_crud_listId(?)}";
@@ -207,7 +207,7 @@ public class inMysqlAdapter_JDBC implements Crud_RepositoryPort {
     }
 
     @Override
-    public Optional<Crud_Entity> find_Crud_Entity_JDBC_SP_ByName(String typeBean, String name) {
+    public Optional<Crud_Entity> find_Crud_Entity_JDBC_SP_ByName(String name) {
         JdbcTemplate currentTemplate = getDynamicJdbcTemplate();
         try{
             String sql = "{call jbAPI_crud_list_byName(?)}";
@@ -229,7 +229,7 @@ public class inMysqlAdapter_JDBC implements Crud_RepositoryPort {
     }
 
     @Override
-    public Optional<List<Crud_Entity>> find_Crud_Entity_JDBC_SP_ByNames(String typeBean, List<Crud_Entity> entityList) {
+    public Optional<List<Crud_Entity>> find_Crud_Entity_JDBC_SP_ByNames(List<Crud_Entity> entityList) {
         JdbcTemplate currentTemplate = getDynamicJdbcTemplate();
         try{
             String sql = "{ call jbAPI_crud_list_byNames(?) }";
@@ -257,16 +257,16 @@ public class inMysqlAdapter_JDBC implements Crud_RepositoryPort {
 
     //region update and delete methods
     @Override
-    public Crud_Entity update_Crud_Entity_JDBC_SP(String typeBean,InsertUpdate_Crud_Model Entity) {
+    public Crud_Entity update_Crud_Entity_JDBC_SP(InsertUpdate_Crud_Model Entity) {
         JdbcTemplate currentTemplate = getDynamicJdbcTemplate();
         String sql = "{call jbAPI_crud_update(?,?,?)}";
         try{
-            Optional<Crud_Entity> existingEntityOpt = find_Crud_Entity_JDBC_SP_ById(typeBean, Entity.id()).filter(a -> Boolean.TRUE.equals(a.getState()));
+            Optional<Crud_Entity> existingEntityOpt = find_Crud_Entity_JDBC_SP_ById(Entity.id()).filter(a -> Boolean.TRUE.equals(a.getState()));
             if (existingEntityOpt.isEmpty()) {
                 throw new RuntimeException("El identificador mencionado no existe o se encuntra eliminado/anulado, Id: "+Entity.id());
             }
             currentTemplate.update(sql,  Entity.id(), Entity.name(), Entity.email());
-            Optional<Crud_Entity> updatedEntityOpt = find_Crud_Entity_JDBC_SP_ById(typeBean, Entity.id());
+            Optional<Crud_Entity> updatedEntityOpt = find_Crud_Entity_JDBC_SP_ById(Entity.id());
             return updatedEntityOpt.get();
         }catch(DataAccessException e){
             throw new RuntimeException(e.getMessage());
@@ -274,11 +274,11 @@ public class inMysqlAdapter_JDBC implements Crud_RepositoryPort {
     }
 
     @Override
-    public void delete_Crud_Entity_phisical_JDBC_SP_ById(String typeBean,Long id) {
+    public void delete_Crud_Entity_phisical_JDBC_SP_ById(Long id) {
         JdbcTemplate currentTemplate = getDynamicJdbcTemplate();
         String sql = "{call jbAPI_crud_delete_phisical(?)}";
         try{
-            Optional<Crud_Entity> existingEntityOpt = find_Crud_Entity_JDBC_SP_ById(typeBean, id);
+            Optional<Crud_Entity> existingEntityOpt = find_Crud_Entity_JDBC_SP_ById(id);
             if (existingEntityOpt.isEmpty()) {
                 throw new RuntimeException("Error al eliminar físicamente: el ID: "+id+" no existe.");
             }
@@ -289,16 +289,16 @@ public class inMysqlAdapter_JDBC implements Crud_RepositoryPort {
     }
 
     @Override
-    public Crud_Entity delete_Crud_Entity_logical_JDBC_SP_ById(String typeBean,Crud_Entity Entity) {
+    public Crud_Entity delete_Crud_Entity_logical_JDBC_SP_ById(Crud_Entity Entity) {
         JdbcTemplate currentTemplate = getDynamicJdbcTemplate();
         String sql = "{call jbAPI_crud_delete_logical(?)}";
         try{
-            Optional<Crud_Entity> existingEntityOpt = find_Crud_Entity_JDBC_SP_ById(typeBean, Entity.getId()).filter(a -> Boolean.TRUE.equals(a.getState()));
+            Optional<Crud_Entity> existingEntityOpt = find_Crud_Entity_JDBC_SP_ById(Entity.getId()).filter(a -> Boolean.TRUE.equals(a.getState()));
             if (existingEntityOpt.isEmpty()) {
                 throw new RuntimeException("El identificador mencionado no existe o se encuntra eliminado/anulado, Id: "+Entity.getId());
             }
             currentTemplate.update(sql, Entity.getId());
-            Optional<Crud_Entity> updatedEntityOpt = find_Crud_Entity_JDBC_SP_ById(typeBean, Entity.getId());
+            Optional<Crud_Entity> updatedEntityOpt = find_Crud_Entity_JDBC_SP_ById(Entity.getId());
             if (updatedEntityOpt.isPresent()) {
                 Entity = updatedEntityOpt.get();
             }
@@ -311,83 +311,83 @@ public class inMysqlAdapter_JDBC implements Crud_RepositoryPort {
 
     //region unimplemented methods
     @Override
-    public Crud_Entity save_Crud_Entity(String typeBean, InsertUpdate_Crud_Model entity) {
+    public Crud_Entity save_Crud_Entity(InsertUpdate_Crud_Model entity) {
         throw new UnsupportedOperationException("Unimplemented method 'save_Crud_Entity'");
     }
     @Override
-    public Crud_Entity save_Crud_Entity_JPA_SP(String typeBean, InsertUpdate_Crud_Model entity) {
+    public Crud_Entity save_Crud_Entity_JPA_SP(InsertUpdate_Crud_Model entity) {
         throw new UnsupportedOperationException("Unimplemented method 'save_Crud_Entity_JPA_SP'");
     }
     @Override
-    public Optional<Crud_Entity> find_Crud_EntityById(String typeBean, Long id) {
+    public Optional<Crud_Entity> find_Crud_EntityById(Long id) {
         throw new UnsupportedOperationException("Unimplemented method 'find_Crud_EntityById'");
     }
     @Override
-    public Optional<Crud_Entity> find_Crud_Entity_JPA_SP_ById(String typeBean, Long id) {
+    public Optional<Crud_Entity> find_Crud_Entity_JPA_SP_ById(Long id) {
         throw new UnsupportedOperationException("Unimplemented method 'find_Crud_Entity_JPA_SP_ById'");
     }
     @Override
-    public List<Crud_Entity> findAll_Crud_entity(String typeBean) {
+    public List<Crud_Entity> findAll_Crud_entity() {
         throw new UnsupportedOperationException("Unimplemented method 'findAll_Crud_entity'");
     }
     @Override
-    public List<Crud_Entity> findAll_Crud_entity_JPA_SP(String typeBean) {
+    public List<Crud_Entity> findAll_Crud_entity_JPA_SP() {
         throw new UnsupportedOperationException("Unimplemented method 'findAll_Crud_entity_JPA_SP'");
     }
     @Override
-    public Crud_Entity update_Crud_Entity(String typeBean, InsertUpdate_Crud_Model entity) {
+    public Crud_Entity update_Crud_Entity(InsertUpdate_Crud_Model entity) {
         throw new UnsupportedOperationException("Unimplemented method 'update_Crud_Entity'");
     }
     @Override
-    public Crud_Entity update_Crud_Entity_JPA_SP(String typeBean, InsertUpdate_Crud_Model entity) {
+    public Crud_Entity update_Crud_Entity_JPA_SP(InsertUpdate_Crud_Model entity) {
         throw new UnsupportedOperationException("Unimplemented method 'update_Crud_Entity_JPA_SP'");
     }
     @Override
-    public void delete_Crud_Entity_phisical_ById(String typeBean, Long id) {
+    public void delete_Crud_Entity_phisical_ById(Long id) {
         throw new UnsupportedOperationException("Unimplemented method 'delete_Crud_Entity_phisical_ById'");
     }
     @Override
-    public void delete_Crud_Entity_phisical_JPA_SP_ById(String typeBean, Long id) {
+    public void delete_Crud_Entity_phisical_JPA_SP_ById(Long id) {
         throw new UnsupportedOperationException("Unimplemented method 'delete_Crud_Entity_phisical_JPA_SP_ById'");
     }
     @Override
-    public Crud_Entity delete_Crud_Entity_logical_ById(String typeBean, Crud_Entity entity) {
+    public Crud_Entity delete_Crud_Entity_logical_ById(Crud_Entity entity) {
         throw new UnsupportedOperationException("Unimplemented method 'delete_Crud_Entity_logical_ById'");
     }
     @Override
-    public Crud_Entity delete_Crud_Entity_logical_JPA_SP_ById(String typeBean, Crud_Entity entity) {
+    public Crud_Entity delete_Crud_Entity_logical_JPA_SP_ById(Crud_Entity entity) {
         throw new UnsupportedOperationException("Unimplemented method 'delete_Crud_Entity_logical_JPA_SP_ById'");
     }
     @Override
-    public List<Crud_multiReadModel> save_multi_Crud_Entity(String typeBean, List<InsertMulti_Crud_Model> entity) {
+    public List<Crud_multiReadModel> save_multi_Crud_Entity(List<InsertMulti_Crud_Model> entity) {
         throw new UnsupportedOperationException("Unimplemented method 'save_multi_Crud_Entity'");
     }
     @Override
-    public List<Crud_multiReadModel> save_multi_Crud_Entity_JPA_SP(String typeBean, List<InsertMulti_Crud_Model> entityList) {
+    public List<Crud_multiReadModel> save_multi_Crud_Entity_JPA_SP(List<InsertMulti_Crud_Model> entityList) {
         throw new UnsupportedOperationException("Unimplemented method 'save_multi_Crud_Entity_JPA_SP'");
     }
     @Override
-    public Optional<Crud_Entity> find_Crud_EntityByName(String typeBean, String name) {
+    public Optional<Crud_Entity> find_Crud_EntityByName(String name) {
         throw new UnsupportedOperationException("Unimplemented method 'find_Crud_EntityByName'");
     }
     @Override
-    public List<Crud_multiReadModel> save_import_Crud_Entity(String typeBean, List<InsertMulti_Crud_Model> entityList) {
+    public List<Crud_multiReadModel> save_import_Crud_Entity(List<InsertMulti_Crud_Model> entityList) {
         throw new UnsupportedOperationException("Unimplemented method 'save_import_Crud_Entity'");
     }
     @Override
-    public List<Crud_multiReadModel> save_import_Crud_Entity_JPA_SP(String typeBean, List<InsertMulti_Crud_Model> entityList) {
+    public List<Crud_multiReadModel> save_import_Crud_Entity_JPA_SP(List<InsertMulti_Crud_Model> entityList) {
         throw new UnsupportedOperationException("Unimplemented method 'save_import_Crud_Entity'");
     }
     @Override
-    public Optional<Crud_Entity> find_Crud_Entity_JPA_SP_ByName(String typeBean, String name){
+    public Optional<Crud_Entity> find_Crud_Entity_JPA_SP_ByName(String name){
         throw new UnsupportedOperationException("Unimplemented method 'find_Crud_Entity_JPA_SP_ByName'");
     }
     @Override
-    public Optional<List<Crud_Entity>> find_Crud_EntityByNames(String typeBean, List<Crud_Entity> names) {
+    public Optional<List<Crud_Entity>> find_Crud_EntityByNames(List<Crud_Entity> names) {
         throw new UnsupportedOperationException("Unimplemented method 'find_Crud_EntityByNames'");
     }
     @Override
-    public Optional<List<Crud_Entity>> find_Crud_Entity_JPA_SP_ByNames(String typeBean, List<Crud_Entity> names) {
+    public Optional<List<Crud_Entity>> find_Crud_Entity_JPA_SP_ByNames(List<Crud_Entity> names) {
         throw new UnsupportedOperationException("Unimplemented method 'find_Crud_Entity_JPA_SP_ByNames'");
     }
     //endregion
