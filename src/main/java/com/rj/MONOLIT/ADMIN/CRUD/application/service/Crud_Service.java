@@ -35,7 +35,7 @@ public class Crud_Service implements Crud_ServicePort {
     public Object save_Crud_Entity(String typeBean, InsertUpdate_Crud_Model entity) {
         try{
             Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-            Object result = repositoryPort.save_Crud_Entity(typeBean, entity);
+            Object result = repositoryPort.save_Crud_Entity(entity);
 
             return helperEndpoints.buildResponse(1, "Registro exitoso", result, null);
         }catch(IllegalArgumentException e){
@@ -49,7 +49,7 @@ public class Crud_Service implements Crud_ServicePort {
     public Object save_Crud_Entity_JDBC_SP(String typeBean, InsertUpdate_Crud_Model entity) {
         try{
             Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-            Object result = repositoryPort.save_Crud_Entity_JDBC_SP(typeBean, entity);
+            Object result = repositoryPort.save_Crud_Entity_JDBC_SP(entity);
 
             return helperEndpoints.buildResponse(1, "Registro exitoso", result, null);
         }catch(IllegalArgumentException e){
@@ -63,7 +63,7 @@ public class Crud_Service implements Crud_ServicePort {
     public Object save_Crud_Entity_JPA_SP(String typeBean, InsertUpdate_Crud_Model entity) {
         try{
             Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-            Object result = repositoryPort.save_Crud_Entity_JPA_SP(typeBean, entity);
+            Object result = repositoryPort.save_Crud_Entity_JPA_SP(entity);
 
             return helperEndpoints.buildResponse(1, "Registro exitoso", result, null);
         }catch(IllegalArgumentException e){
@@ -80,7 +80,7 @@ public class Crud_Service implements Crud_ServicePort {
     public Object save_multi_Crud_Entity(String typeBean, List<InsertMulti_Crud_Model> entityList) {
         try{
             Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-            List<Crud_multiReadModel> result = repositoryPort.save_multi_Crud_Entity(typeBean, entityList);
+            List<Crud_multiReadModel> result = repositoryPort.save_multi_Crud_Entity(entityList);
             if(result.stream().filter(Crud_multiReadModel::isValid).count()==0){
                 return helperEndpoints.buildResponse(-1,"El registro masivo no se realizo", result);
             }
@@ -103,7 +103,7 @@ public class Crud_Service implements Crud_ServicePort {
     public Object save_multi_Crud_Entity_JDBC_SP(String typeBean, List<InsertMulti_Crud_Model> entityList) {
         try{
             Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-            List<Crud_multiReadModel> result = repositoryPort.save_multi_Crud_Entity_JDBC_SP(typeBean, entityList);
+            List<Crud_multiReadModel> result = repositoryPort.save_multi_Crud_Entity_JDBC_SP(entityList);
             if(result.stream().filter(Crud_multiReadModel::isValid).count()==0){
                 return helperEndpoints.buildResponse(-1,"El registro masivo no se realizo", result);
             }
@@ -126,7 +126,7 @@ public class Crud_Service implements Crud_ServicePort {
     public Object save_multi_Crud_Entity_JPA_SP(String typeBean, List<InsertMulti_Crud_Model> entityList) {
         try{
             Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-            List<Crud_multiReadModel> result = repositoryPort.save_multi_Crud_Entity_JPA_SP(typeBean, entityList);
+            List<Crud_multiReadModel> result = repositoryPort.save_multi_Crud_Entity_JPA_SP(entityList);
             if(result.stream().filter(Crud_multiReadModel::isValid).count()==0){
                 return helperEndpoints.buildResponse(-1,"El registro masivo no se realizo", result);
             }
@@ -152,7 +152,7 @@ public class Crud_Service implements Crud_ServicePort {
     public Object save_import_Crud_Entity(String typeBean, List<InsertMulti_Crud_Model> entityList){
         try{
             Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-            List<Crud_multiReadModel> result = repositoryPort.save_import_Crud_Entity(typeBean, entityList);
+            List<Crud_multiReadModel> result = repositoryPort.save_import_Crud_Entity(entityList);
             if(result.stream().filter(Crud_multiReadModel::isValid).count()==0){
                 return helperEndpoints.buildResponse(-1,"El registro masivo no se realizo", result);
             }
@@ -175,7 +175,7 @@ public class Crud_Service implements Crud_ServicePort {
     public Object save_import_Crud_Entity_JDBC_SP(String typeBean, List<InsertMulti_Crud_Model> entityList){
         try{
             Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-            List<Crud_multiReadModel> result = repositoryPort.save_import_Crud_Entity_JDBC_SP(typeBean, entityList);
+            List<Crud_multiReadModel> result = repositoryPort.save_import_Crud_Entity_JDBC_SP(entityList);
             if(result.stream().filter(Crud_multiReadModel::isValid).count()==0){
                 return helperEndpoints.buildResponse(-1,"El registro masivo no se realizo", result);
             }
@@ -198,7 +198,7 @@ public class Crud_Service implements Crud_ServicePort {
     public Object save_import_Crud_Entity_JPA_SP(String typeBean, List<InsertMulti_Crud_Model> entityList){
         try{
             Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-            List<Crud_multiReadModel> result = repositoryPort.save_import_Crud_Entity_JPA_SP(typeBean, entityList);
+            List<Crud_multiReadModel> result = repositoryPort.save_import_Crud_Entity_JPA_SP(entityList);
             if(result.stream().filter(Crud_multiReadModel::isValid).count()==0){
                 return helperEndpoints.buildResponse(-1,"El registro masivo no se realizo", result);
             }
@@ -223,19 +223,19 @@ public class Crud_Service implements Crud_ServicePort {
     @Override
     public Optional<Crud_Entity> find_Crud_EntityById(String typeBean, Long id) {
         Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-        return repositoryPort.find_Crud_EntityById(typeBean, id);
+        return repositoryPort.find_Crud_EntityById(id);
     }
 
     @Override
     public Optional<Crud_Entity> find_Crud_Entity_JDBC_SP_ById(String typeBean, Long id) {
         Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-        return repositoryPort.find_Crud_Entity_JDBC_SP_ById(typeBean, id);
+        return repositoryPort.find_Crud_Entity_JDBC_SP_ById(id);
     }
 
     @Override
     public Optional<Crud_Entity> find_Crud_Entity_JPA_SP_ById(String typeBean, Long id) {
         Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-        return repositoryPort.find_Crud_Entity_JPA_SP_ById(typeBean, id);
+        return repositoryPort.find_Crud_Entity_JPA_SP_ById(id);
     }
     //endregion
 
@@ -243,19 +243,19 @@ public class Crud_Service implements Crud_ServicePort {
     @Override
     public Optional<Crud_Entity> find_Crud_EntityByName(String typeBean, String name) {
         Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-        return repositoryPort.find_Crud_EntityByName(typeBean, name);
+        return repositoryPort.find_Crud_EntityByName(name);
     }
 
     @Override
     public Optional<Crud_Entity> find_Crud_Entity_JDBC_SP_ByName(String typeBean, String name) {
         Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-        return repositoryPort.find_Crud_Entity_JDBC_SP_ByName(typeBean, name);
+        return repositoryPort.find_Crud_Entity_JDBC_SP_ByName(name);
     }
 
     @Override
     public Optional<Crud_Entity> find_Crud_Entity_JPA_SP_ByName(String typeBean, String name) {
         Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-        return repositoryPort.find_Crud_Entity_JPA_SP_ByName(typeBean, name);
+        return repositoryPort.find_Crud_Entity_JPA_SP_ByName(name);
     }
     //endregion
 
@@ -263,19 +263,19 @@ public class Crud_Service implements Crud_ServicePort {
     @Override
     public Optional<List<Crud_Entity>> find_Crud_EntityByNames(String typeBean, List<Crud_Entity> names) {
         Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-        return repositoryPort.find_Crud_EntityByNames(typeBean, names);
+        return repositoryPort.find_Crud_EntityByNames(names);
     }
 
     @Override
     public Optional<List<Crud_Entity>> find_Crud_Entity_JDBC_SP_ByNames(String typeBean, List<Crud_Entity> names) {
         Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-        return repositoryPort.find_Crud_Entity_JDBC_SP_ByNames(typeBean, names);
+        return repositoryPort.find_Crud_Entity_JDBC_SP_ByNames(names);
     }
 
     @Override
     public Optional<List<Crud_Entity>> find_Crud_Entity_JPA_SP_ByNames(String typeBean, List<Crud_Entity> names) {
         Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-        return repositoryPort.find_Crud_Entity_JPA_SP_ByNames(typeBean, names);
+        return repositoryPort.find_Crud_Entity_JPA_SP_ByNames(names);
     }
     //endregion
 
@@ -283,19 +283,19 @@ public class Crud_Service implements Crud_ServicePort {
     @Override
     public List<Crud_Entity> findAll_Crud_entity(String typeBean) {
         Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-        return repositoryPort.findAll_Crud_entity(typeBean);
+        return repositoryPort.findAll_Crud_entity();
     }
     
     @Override
     public List<Crud_Entity> findAll_Crud_entity_JDBC_SP(String typeBean) {
         Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-        return repositoryPort.findAll_Crud_entity_JDBC_SP(typeBean);
+        return repositoryPort.findAll_Crud_entity_JDBC_SP();
     }
     
     @Override
     public List<Crud_Entity> findAll_Crud_entity_JPA_SP(String typeBean) {
         Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-        return repositoryPort.findAll_Crud_entity_JPA_SP(typeBean);
+        return repositoryPort.findAll_Crud_entity_JPA_SP();
     }
     //endregion
 
@@ -305,7 +305,7 @@ public class Crud_Service implements Crud_ServicePort {
     public Object update_Crud_Entity(String typeBean, InsertUpdate_Crud_Model entity) {
         try{
             Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-            Crud_Entity result = repositoryPort.update_Crud_Entity(typeBean, entity);
+            Crud_Entity result = repositoryPort.update_Crud_Entity(entity);
             return helperEndpoints.buildResponse(1, "Actualización exitosa", null,null,result);
         }catch(Exception e){
             return helperEndpoints.buildResponse(-1, e.getMessage(), entity);
@@ -316,7 +316,7 @@ public class Crud_Service implements Crud_ServicePort {
     public Object update_Crud_Entity_JDBC_SP(String typeBean, InsertUpdate_Crud_Model entity) {
         try{
             Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-            Crud_Entity result = repositoryPort.update_Crud_Entity_JDBC_SP(typeBean, entity);
+            Crud_Entity result = repositoryPort.update_Crud_Entity_JDBC_SP(entity);
             return helperEndpoints.buildResponse(1, "Actualización exitosa", null,null,result);
         }catch(Exception e){
             return helperEndpoints.buildResponse(-1, e.getMessage(), entity);
@@ -327,7 +327,7 @@ public class Crud_Service implements Crud_ServicePort {
     public Object update_Crud_Entity_JPA_SP(String typeBean, InsertUpdate_Crud_Model entity) {
         try{
             Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-            Crud_Entity result = repositoryPort.update_Crud_Entity_JPA_SP(typeBean, entity);
+            Crud_Entity result = repositoryPort.update_Crud_Entity_JPA_SP(entity);
             return helperEndpoints.buildResponse(1, "Actualización exitosa", null,null,result);
         }catch(Exception e){
             return helperEndpoints.buildResponse(-1, e.getMessage(), entity);
@@ -339,18 +339,18 @@ public class Crud_Service implements Crud_ServicePort {
     @Override
     public void delete_Crud_Entity_phisical_ById(String typeBean, Long id) {
         Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-        repositoryPort.delete_Crud_Entity_phisical_ById(typeBean, id);
+        repositoryPort.delete_Crud_Entity_phisical_ById(id);
     }
 
     @Override
     public void delete_Crud_Entity_phisical_JDBC_SP_ById(String typeBean, Long id) {
         Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-        repositoryPort.delete_Crud_Entity_phisical_JDBC_SP_ById(typeBean, id);
+        repositoryPort.delete_Crud_Entity_phisical_JDBC_SP_ById(id);
     }
     @Override
     public void delete_Crud_Entity_phisical_JPA_SP_ById(String typeBean, Long id) {
         Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-        repositoryPort.delete_Crud_Entity_phisical_JPA_SP_ById(typeBean, id);
+        repositoryPort.delete_Crud_Entity_phisical_JPA_SP_ById(id);
     }
     //endregion
 
@@ -359,7 +359,7 @@ public class Crud_Service implements Crud_ServicePort {
     public Object delete_Crud_Entity_logical_ById(String typeBean, Crud_Entity entity) {
         try{
             Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-            entity = repositoryPort.delete_Crud_Entity_logical_ById(typeBean, entity);
+            entity = repositoryPort.delete_Crud_Entity_logical_ById(entity);
             
             return helperEndpoints.buildResponse(1, "Eliminación lógica exitosa", null, null, entity);
         }catch(Exception e){
@@ -371,7 +371,7 @@ public class Crud_Service implements Crud_ServicePort {
     public Object delete_Crud_Entity_logical_JDBC_SP_ById(String typeBean, Crud_Entity entity) {
         try{
             Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-            entity = repositoryPort.delete_Crud_Entity_logical_JDBC_SP_ById(typeBean, entity);
+            entity = repositoryPort.delete_Crud_Entity_logical_JDBC_SP_ById(entity);
             
             return helperEndpoints.buildResponse(1, "Eliminación lógica exitosa", null, null, entity);
         }catch(Exception e){
@@ -383,7 +383,7 @@ public class Crud_Service implements Crud_ServicePort {
     public Object delete_Crud_Entity_logical_JPA_SP_ById(String typeBean, Crud_Entity entity) {
         try{
             Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-            entity = repositoryPort.delete_Crud_Entity_logical_JPA_SP_ById(typeBean, entity);
+            entity = repositoryPort.delete_Crud_Entity_logical_JPA_SP_ById(entity);
             
             return helperEndpoints.buildResponse(1, "Eliminación lógica exitosa", null, null, entity);
         }catch(Exception e){
