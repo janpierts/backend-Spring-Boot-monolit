@@ -1,4 +1,4 @@
-package com.rj.MONOLIT.CRUD;
+package com.rj.MONOLIT;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

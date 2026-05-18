@@ -4,10 +4,18 @@ import com.rj.MONOLIT.COMMON.utils.helperEndpoints;
 
 public record InsertUpdate_Crud_Model(Long id, String name, String email) {
     public void validate(){
-        if(name == null || name.isBlank()) throw new IllegalArgumentException("Name is required");
-        if(email == null || email.isBlank()) throw new IllegalArgumentException("Email is required");
-        if(helperEndpoints.isAlphabeticWithSpaces(name) == false || helperEndpoints.isValidEmail(email) == false){
-            throw new IllegalArgumentException("Name(only Alphabetic) or Email format is invalid");
+        String mssg="";
+        if(name == null || name.isBlank()) throw new IllegalArgumentException("Name is required.");
+        if(name.length()>255 || !helperEndpoints.isAlphabeticWithSpaces(name)) {
+            if(name.length()>255) mssg+="Name is too long(max character required: '255').";
+            if(!helperEndpoints.isAlphabeticWithSpaces(name)) mssg+=" | Name required(only Alphabetic with spaces)";
+            throw new IllegalArgumentException(mssg);
+        }
+        if(email == null || email.isBlank()) throw new IllegalArgumentException("Email is required.");
+        if(email.length()>255 || !helperEndpoints.isValidEmail(email)){
+            if(email.length()>255) mssg+="Email is too long(max character required: '255').";
+            if(!helperEndpoints.isValidEmail(email)) mssg+=" | Email reuired(email format).";
+            throw new IllegalArgumentException(mssg);
         }
     }
 }
