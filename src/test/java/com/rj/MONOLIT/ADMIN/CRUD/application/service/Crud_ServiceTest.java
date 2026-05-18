@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,7 +44,7 @@ class Crud_ServiceTest {
         testReturnEntity.setCreated(LocalDateTime.now());
         testReturnEntity.setState(true);
 
-        java.util.Map<String, Object> respuestaEsperada = new java.util.HashMap<>();
+        Map<String, Object> respuestaEsperada = new HashMap<>();
         respuestaEsperada.put("state", 1);
         respuestaEsperada.put("message", "Registro exitoso");
         respuestaEsperada.put("successBody", testReturnEntity);
@@ -58,4 +59,28 @@ class Crud_ServiceTest {
         verify(crudRepositoryPort, times(1)).save_Crud_Entity(dtoInput);
     }
 
+    @Test
+    void updateSimpleSuccessEntity(){
+        InsertUpdate_Crud_Model dtoInput = new InsertUpdate_Crud_Model(1L, "Test Name", "data.test@email.dev");
+        Crud_Entity testReturnEntity = new Crud_Entity();
+        testReturnEntity.setId(1L);
+        testReturnEntity.setName("Test Name");
+        testReturnEntity.setEmail("data.test@email.dev");
+        testReturnEntity.setCreated(LocalDateTime.now());
+        testReturnEntity.setState(true);
+
+        Map<String, Object> respuestaEsperada = new HashMap<>();
+        respuestaEsperada.put("state", 1);
+        respuestaEsperada.put("message", "Registro exitoso");
+        respuestaEsperada.put("updateBody", testReturnEntity);
+        when(crudRepositoryPortMap.get("inMysqlAdapter_JPA")).thenReturn(crudRepositoryPort);
+        when(crudRepositoryPort.update_Crud_Entity(dtoInput)).thenReturn(testReturnEntity);
+        Object result = crudService.update_Crud_Entity("inMysqlAdapter_JPA", dtoInput);
+        assertNotNull(result,"The result never be null");
+        Map<?, ?> resultMap = (Map<?, ?>) result;
+        assertEquals(1,resultMap.get("state"));
+        assertEquals("Actualización exitosa",resultMap.get("message"));
+        assertEquals(testReturnEntity,resultMap.get("updateBody"));
+        verify(crudRepositoryPort, times(1)).update_Crud_Entity(dtoInput);
+    }
 }
