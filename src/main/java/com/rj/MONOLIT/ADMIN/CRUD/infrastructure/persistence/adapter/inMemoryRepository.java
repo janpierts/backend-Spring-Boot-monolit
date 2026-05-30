@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
 import com.rj.MONOLIT.ADMIN.CRUD.application.dto.InsertMulti_Crud_Model;
 import com.rj.MONOLIT.ADMIN.CRUD.application.dto.InsertUpdate_Crud_Model;
+import com.rj.MONOLIT.ADMIN.CRUD.application.dto.SearchRequest;
 import com.rj.MONOLIT.ADMIN.CRUD.application.ports.out.Crud_RepositoryPort;
 import com.rj.MONOLIT.ADMIN.CRUD.domain.model.Crud_Entity;
 import com.rj.MONOLIT.ADMIN.CRUD.domain.readmodel.Crud_multiReadModel;
@@ -43,9 +44,9 @@ public class inMemoryRepository implements Crud_RepositoryPort{
     //region save multiple entities
     @Override
     public List<Crud_multiReadModel> save_multi_Crud_Entity(List<InsertMulti_Crud_Model> entityList) {
-        List<Crud_Entity> SearchList = entityList.stream()
+        List<SearchRequest> SearchList = entityList.stream()
             .filter(InsertMulti_Crud_Model::isValid)
-            .map(model -> new Crud_Entity(null,model.name(),model.email(),null,null,null))
+            .map(model -> new SearchRequest(model.name(),model.email()))
             .toList();
         List<String> existingNames = find_Crud_EntityByNames(SearchList)
             .map(list -> list.stream()
@@ -65,7 +66,8 @@ public class inMemoryRepository implements Crud_RepositoryPort{
             return readmodel;
         }
         List<Crud_Entity> filteredEntities = SearchList.stream()
-            .filter(entity -> !existingNames.contains(entity.getName()))
+            .filter(entity -> !existingNames.contains(entity.name()))
+            .map(model -> new Crud_Entity(null,model.name(),model.email(),null,null,null))
             .collect(Collectors.toList());
             
         for (Crud_Entity entity : filteredEntities) {
@@ -120,10 +122,10 @@ public class inMemoryRepository implements Crud_RepositoryPort{
 
     //region find entities by names
     @Override
-    public Optional<List<Crud_Entity>> find_Crud_EntityByNames(List<Crud_Entity> names) {
+    public Optional<List<Crud_Entity>> find_Crud_EntityByNames(List<SearchRequest> names) {
         List<Crud_Entity> result = entities.stream()
         .filter(e -> e.getName() != null && 
-                names.stream().anyMatch(n -> n.getName().equals(e.getName())))
+                names.stream().anyMatch(n -> n.name().equals(e.getName())))
         .collect(Collectors.toList());
 
         return result.isEmpty() ? Optional.empty() : Optional.of(result);
@@ -167,21 +169,17 @@ public class inMemoryRepository implements Crud_RepositoryPort{
     
     //region delete entity logical
     @Override
-    public Crud_Entity delete_Crud_Entity_logical_ById(Crud_Entity entity) {
-        Optional<Crud_Entity> existingEntityOpt = find_Crud_EntityById(entity.getId()).filter(a -> Boolean.TRUE.equals(a.getState()));
+    public Crud_Entity delete_Crud_Entity_logical_ById(Long id) {
+        Optional<Crud_Entity> existingEntityOpt = find_Crud_EntityById(id).filter(a -> Boolean.TRUE.equals(a.getState()));
         if (existingEntityOpt.isEmpty()) {
-            throw new RuntimeException("El identificador mencionado no existe o se encuntra eliminado/anulado, Id: "+entity.getId());
+            throw new RuntimeException("El identificador mencionado no existe o se encuntra eliminado/anulado, Id: "+id);
         }
         Crud_Entity existingEntity = existingEntityOpt.get();
-        delete_Crud_Entity_phisical_ById(entity.getId());
-        entity.setId(existingEntity.getId());
-        entity.setName(existingEntity.getName());
-        entity.setEmail(existingEntity.getEmail());
-        entity.setCreated(existingEntity.getCreated());
-        entity.setUpdated(LocalDateTime.now());
-        entity.setState(false);
-        entities.add(entity);
-        return entity;
+        delete_Crud_Entity_phisical_ById(id);
+        existingEntity.setUpdated(LocalDateTime.now());
+        existingEntity.setState(false);
+        entities.add(existingEntity);
+        return existingEntity;
     }
     //endregion
     
@@ -229,11 +227,11 @@ public class inMemoryRepository implements Crud_RepositoryPort{
         throw new UnsupportedOperationException("Unimplemented method 'delete_Crud_Entity_phisical_JPA_SP_ById'");
     }
     @Override
-    public Crud_Entity delete_Crud_Entity_logical_JDBC_SP_ById(Crud_Entity entity) {
+    public Crud_Entity delete_Crud_Entity_logical_JDBC_SP_ById(Long id) {
         throw new UnsupportedOperationException("Unimplemented method 'delete_Crud_Entity_logical_JDBC_SP_ById'");
     }
     @Override
-    public Crud_Entity delete_Crud_Entity_logical_JPA_SP_ById(Crud_Entity entity) {
+    public Crud_Entity delete_Crud_Entity_logical_JPA_SP_ById(Long id) {
         throw new UnsupportedOperationException("Unimplemented method 'delete_Crud_Entity_logical_JPA_SP_ById'");
     }
     @Override
@@ -253,11 +251,11 @@ public class inMemoryRepository implements Crud_RepositoryPort{
         throw new UnsupportedOperationException("Unimplemented method 'save_multi_Crud_Entity_JPA_SP'");
     }
     @Override
-    public Optional<List<Crud_Entity>> find_Crud_Entity_JDBC_SP_ByNames(List<Crud_Entity> names) {
+    public Optional<List<Crud_Entity>> find_Crud_Entity_JDBC_SP_ByNames(List<SearchRequest> names) {
         throw new UnsupportedOperationException("Unimplemented method 'find_Crud_Entity_JDBC_SP_ByNames'");
     }
     @Override
-    public Optional<List<Crud_Entity>> find_Crud_Entity_JPA_SP_ByNames(List<Crud_Entity> names) {
+    public Optional<List<Crud_Entity>> find_Crud_Entity_JPA_SP_ByNames(List<SearchRequest> names) {
         throw new UnsupportedOperationException("Unimplemented method 'find_Crud_Entity_JPA_SP_ByNames'");
     }
     @Override

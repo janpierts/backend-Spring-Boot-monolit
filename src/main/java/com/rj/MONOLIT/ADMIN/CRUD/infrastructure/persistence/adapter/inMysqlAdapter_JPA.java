@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rj.MONOLIT.ADMIN.CRUD.application.dto.InsertMulti_Crud_Model;
 import com.rj.MONOLIT.ADMIN.CRUD.application.dto.InsertUpdate_Crud_Model;
+import com.rj.MONOLIT.ADMIN.CRUD.application.dto.SearchRequest;
 import com.rj.MONOLIT.ADMIN.CRUD.application.ports.out.Crud_RepositoryPort;
 import com.rj.MONOLIT.ADMIN.CRUD.domain.model.Crud_Entity;
 import com.rj.MONOLIT.ADMIN.CRUD.domain.readmodel.Crud_multiReadModel;
@@ -176,7 +177,9 @@ public class inMysqlAdapter_JPA implements Crud_RepositoryPort {
             .filter(InsertMulti_Crud_Model::isValid)
             .map(k -> new Crud_Entity(null,k.name(),null,null,null,null))
             .collect(Collectors.toList()); 
-        List<Crud_Entity> alreadyNames = find_Crud_Entity_JPA_SP_ByNames(SearchList).orElseGet(ArrayList::new);
+        List<Crud_Entity> alreadyNames = find_Crud_Entity_JPA_SP_ByNames(SearchList.stream()
+            .map(model -> new SearchRequest(model.getName(),null))
+            .collect(Collectors.toList())).orElseGet(ArrayList::new);
         Set<String> existingNames = alreadyNames.stream()
             .map(Crud_Entity::getName)
             .collect(Collectors.toSet());
@@ -191,7 +194,9 @@ public class inMysqlAdapter_JPA implements Crud_RepositoryPort {
             String jsonObject = objectMapper.writeValueAsString(filteredEntities);
             query.setParameter("p_data_json", jsonObject);
             query.execute();
-            List<Crud_Entity> result = find_Crud_Entity_JPA_SP_ByNames(filteredEntities).orElseGet(ArrayList::new);
+            List<Crud_Entity> result = find_Crud_Entity_JPA_SP_ByNames(filteredEntities.stream()
+                .map(model -> new SearchRequest(model.getName(),null))
+                .collect(Collectors.toList())).orElseGet(ArrayList::new);
             if(!result.isEmpty()){
                 readmodel.addAll(result.stream()
                     .map(k -> new Crud_multiReadModel(k.getId(), k.getName(), k.getEmail(), k.getCreated(), k.getUpdated(), k.getState(), true, "Registro insertado correctamente"))
@@ -310,10 +315,10 @@ public class inMysqlAdapter_JPA implements Crud_RepositoryPort {
     }
 
     @Override
-    public Optional<List<Crud_Entity>> find_Crud_EntityByNames(List<Crud_Entity> names) {
+    public Optional<List<Crud_Entity>> find_Crud_EntityByNames(List<SearchRequest> names) {
         try{
             Set<String> namesToValidate = names.stream()
-                .map(Crud_Entity::getName)
+                .map(SearchRequest::name)
                 .collect(Collectors.toSet());
     
             List<CrudEntityJpa> existingEntities = jpaRepository.findByNameIn(namesToValidate);
@@ -328,7 +333,7 @@ public class inMysqlAdapter_JPA implements Crud_RepositoryPort {
     }
 
     @Override
-    public Optional<List<Crud_Entity>> find_Crud_Entity_JPA_SP_ByNames(List<Crud_Entity> names) {
+    public Optional<List<Crud_Entity>> find_Crud_Entity_JPA_SP_ByNames(List<SearchRequest> names) {
         try {
             EntityManager em = getDynamicEntityManager();
             StoredProcedureQuery query = em.createNamedStoredProcedureQuery("jbAPI_crud_list_byNames_query");
@@ -446,13 +451,12 @@ public class inMysqlAdapter_JPA implements Crud_RepositoryPort {
 
     //region logical delete
     @Override
-    public Crud_Entity delete_Crud_Entity_logical_ById(Crud_Entity entity) {
+    public Crud_Entity delete_Crud_Entity_logical_ById(Long id) {
         try{
-            Long id = entity.getId();
             if (!jpaRepository.existsById(id)) {
-                throw new RuntimeException("El identificador mencionado no existe o se encuntra eliminado/anulado, Id: "+entity.getId());
+                throw new RuntimeException("El identificador mencionado no existe o se encuntra eliminado/anulado, Id: "+id);
             }
-            CrudEntityJpa jpaEntity_update = jpaRepository.findById(id).filter(a -> Boolean.TRUE.equals(a.getState())).orElseThrow(() -> new RuntimeException("El identificador mencionado no existe o se encuntra eliminado/anulado, Id: "+entity.getId()));
+            CrudEntityJpa jpaEntity_update = jpaRepository.findById(id).filter(a -> Boolean.TRUE.equals(a.getState())).orElseThrow(() -> new RuntimeException("El identificador mencionado no existe o se encuntra eliminado/anulado, Id: "+id));
             jpaEntity_update.setState(false);
             CrudEntityJpa updatedJpaEntity = jpaRepository.save(jpaEntity_update);
             return updatedJpaEntity.toDomainEntity();
@@ -463,20 +467,20 @@ public class inMysqlAdapter_JPA implements Crud_RepositoryPort {
     }
 
     @Override
-    public Crud_Entity delete_Crud_Entity_logical_JPA_SP_ById(Crud_Entity entity) {
+    public Crud_Entity delete_Crud_Entity_logical_JPA_SP_ById(Long id) {
         try{
-            Optional<Crud_Entity> exisEntity = find_Crud_Entity_JPA_SP_ById(entity.getId()).filter(a -> Boolean.TRUE.equals(a.getState()));
+            Optional<Crud_Entity> exisEntity = find_Crud_Entity_JPA_SP_ById(id).filter(a -> Boolean.TRUE.equals(a.getState()));
             if(!exisEntity.isPresent()){
-                throw new RuntimeException("El identificador mencionado no existe o se encuntra eliminado/anulado, Id: "+entity.getId());
+                throw new RuntimeException("El identificador mencionado no existe o se encuntra eliminado/anulado, Id: "+id);
             }
             EntityManager em = getDynamicEntityManager();
             StoredProcedureQuery query = em.createNamedStoredProcedureQuery("jbAPI_crud_delete_logical_query");
-            query.setParameter("p_id", entity.getId());
+            query.setParameter("p_id", id);
             query.execute();
     
-            return find_Crud_Entity_JPA_SP_ById(entity.getId())
+            return find_Crud_Entity_JPA_SP_ById(id)
                .orElseThrow(() -> 
-                   new RuntimeException("Error al verificar la actualización del ID: " + entity.getId())
+                   new RuntimeException("Error al verificar la actualización del ID: " + id)
                );
         }catch(Exception e){
             throw new RuntimeException("Error: "+e.getMessage());
@@ -506,7 +510,7 @@ public class inMysqlAdapter_JPA implements Crud_RepositoryPort {
         throw new UnsupportedOperationException("Unimplemented method 'delete_Crud_Entity_phisical_JDBC_SP_ById'");
     }
     @Override
-    public Crud_Entity delete_Crud_Entity_logical_JDBC_SP_ById(Crud_Entity entity) {
+    public Crud_Entity delete_Crud_Entity_logical_JDBC_SP_ById(Long id) {
         throw new UnsupportedOperationException("Unimplemented method 'delete_Crud_Entity_logical_JDBC_SP_ById'");
     }
     @Override
@@ -522,7 +526,7 @@ public class inMysqlAdapter_JPA implements Crud_RepositoryPort {
         throw new UnsupportedOperationException("Unimplemented method 'find_Crud_Entity_JDBC_SP_ByName'");
     }
     @Override
-    public Optional<List<Crud_Entity>> find_Crud_Entity_JDBC_SP_ByNames(List<Crud_Entity> names){
+    public Optional<List<Crud_Entity>> find_Crud_Entity_JDBC_SP_ByNames(List<SearchRequest> names){
         throw new UnsupportedOperationException("Unimplemented method 'find_Crud_Entity_JDBC_SP_ByNames'");
     }
     //endregion
