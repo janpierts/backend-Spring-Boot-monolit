@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import com.rj.MONOLIT.ADMIN.CRUD.application.dto.InsertMulti_Crud_Model;
 import com.rj.MONOLIT.ADMIN.CRUD.application.dto.InsertUpdate_Crud_Model;
+import com.rj.MONOLIT.ADMIN.CRUD.application.dto.SearchRequest;
 import com.rj.MONOLIT.ADMIN.CRUD.application.ports.in.Crud_ServicePort;
 import com.rj.MONOLIT.ADMIN.CRUD.application.ports.out.Crud_RepositoryPort;
 import com.rj.MONOLIT.ADMIN.CRUD.domain.model.Crud_Entity;
@@ -261,19 +262,19 @@ public class Crud_Service implements Crud_ServicePort {
 
     //region FindEntitiesByNames
     @Override
-    public Optional<List<Crud_Entity>> find_Crud_EntityByNames(String typeBean, List<Crud_Entity> names) {
+    public Optional<List<Crud_Entity>> find_Crud_EntityByNames(String typeBean, List<SearchRequest> names) {
         Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
         return repositoryPort.find_Crud_EntityByNames(names);
     }
 
     @Override
-    public Optional<List<Crud_Entity>> find_Crud_Entity_JDBC_SP_ByNames(String typeBean, List<Crud_Entity> names) {
+    public Optional<List<Crud_Entity>> find_Crud_Entity_JDBC_SP_ByNames(String typeBean, List<SearchRequest> names) {
         Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
         return repositoryPort.find_Crud_Entity_JDBC_SP_ByNames(names);
     }
 
     @Override
-    public Optional<List<Crud_Entity>> find_Crud_Entity_JPA_SP_ByNames(String typeBean, List<Crud_Entity> names) {
+    public Optional<List<Crud_Entity>> find_Crud_Entity_JPA_SP_ByNames(String typeBean, List<SearchRequest> names) {
         Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
         return repositoryPort.find_Crud_Entity_JPA_SP_ByNames(names);
     }
@@ -356,38 +357,38 @@ public class Crud_Service implements Crud_ServicePort {
 
     //region DeleteLogicalEntityById
     @Override
-    public Object delete_Crud_Entity_logical_ById(String typeBean, Crud_Entity entity) {
+    public Object delete_Crud_Entity_logical_ById(String typeBean, Long id) {
         try{
             Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-            entity = repositoryPort.delete_Crud_Entity_logical_ById(entity);
+            Crud_Entity entity = repositoryPort.delete_Crud_Entity_logical_ById(id);
             
             return helperEndpoints.buildResponse(1, "Eliminación lógica exitosa", null, null, entity);
         }catch(Exception e){
-            return helperEndpoints.buildResponse(-1, e.getMessage(), entity);
+            return helperEndpoints.buildResponse(-1, e.getMessage(), new Crud_Entity(id,null,null,null,null,null));
         }
     }
 
     @Override
-    public Object delete_Crud_Entity_logical_JDBC_SP_ById(String typeBean, Crud_Entity entity) {
+    public Object delete_Crud_Entity_logical_JDBC_SP_ById(String typeBean, Long id) {
         try{
             Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-            entity = repositoryPort.delete_Crud_Entity_logical_JDBC_SP_ById(entity);
+            Crud_Entity entity = repositoryPort.delete_Crud_Entity_logical_JDBC_SP_ById(id);
             
             return helperEndpoints.buildResponse(1, "Eliminación lógica exitosa", null, null, entity);
         }catch(Exception e){
-            return helperEndpoints.buildResponse(-1, e.getMessage(), entity);
+            return helperEndpoints.buildResponse(-1, e.getMessage(), id);
         }
     }
 
     @Override
-    public Object delete_Crud_Entity_logical_JPA_SP_ById(String typeBean, Crud_Entity entity) {
+    public Object delete_Crud_Entity_logical_JPA_SP_ById(String typeBean, Long id) {
         try{
             Crud_RepositoryPort repositoryPort = getRepositoryPort(typeBean);
-            entity = repositoryPort.delete_Crud_Entity_logical_JPA_SP_ById(entity);
+            Crud_Entity entity = repositoryPort.delete_Crud_Entity_logical_JPA_SP_ById(id);
             
             return helperEndpoints.buildResponse(1, "Eliminación lógica exitosa", null, null, entity);
         }catch(Exception e){
-            return helperEndpoints.buildResponse(-1, e.getMessage(), entity);
+            return helperEndpoints.buildResponse(-1, e.getMessage(),  new Crud_Entity(id,null,null,null,null,null));
         }
     }
     //endregion

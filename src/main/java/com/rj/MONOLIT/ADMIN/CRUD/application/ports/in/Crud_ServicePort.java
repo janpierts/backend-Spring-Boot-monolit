@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import com.rj.MONOLIT.ADMIN.CRUD.application.dto.InsertMulti_Crud_Model;
 import com.rj.MONOLIT.ADMIN.CRUD.application.dto.InsertUpdate_Crud_Model;
+import com.rj.MONOLIT.ADMIN.CRUD.application.dto.SearchRequest;
 import com.rj.MONOLIT.ADMIN.CRUD.domain.model.Crud_Entity;
 
 public interface Crud_ServicePort {
@@ -22,9 +23,9 @@ public interface Crud_ServicePort {
     Optional<Crud_Entity> find_Crud_EntityByName(String typeBean, String name);
     Optional<Crud_Entity> find_Crud_Entity_JDBC_SP_ByName(String typeBean, String name);
     Optional<Crud_Entity> find_Crud_Entity_JPA_SP_ByName(String typeBean, String name);
-    Optional<List<Crud_Entity>> find_Crud_EntityByNames(String typeBean, List<Crud_Entity> names);
-    Optional<List<Crud_Entity>> find_Crud_Entity_JDBC_SP_ByNames(String typeBean, List<Crud_Entity> names);
-    Optional<List<Crud_Entity>> find_Crud_Entity_JPA_SP_ByNames(String typeBean, List<Crud_Entity> names);
+    Optional<List<Crud_Entity>> find_Crud_EntityByNames(String typeBean, List<SearchRequest> names);
+    Optional<List<Crud_Entity>> find_Crud_Entity_JDBC_SP_ByNames(String typeBean, List<SearchRequest> names);
+    Optional<List<Crud_Entity>> find_Crud_Entity_JPA_SP_ByNames(String typeBean, List<SearchRequest> names);
     List<Crud_Entity> findAll_Crud_entity(String typeBean);
     List<Crud_Entity> findAll_Crud_entity_JDBC_SP(String typeBean);
     List<Crud_Entity> findAll_Crud_entity_JPA_SP(String typeBean);
@@ -34,7 +35,7 @@ public interface Crud_ServicePort {
     void delete_Crud_Entity_phisical_ById(String typeBean,Long id);
     void delete_Crud_Entity_phisical_JDBC_SP_ById(String typeBean,Long id);
     void delete_Crud_Entity_phisical_JPA_SP_ById(String typeBean,Long id);
-    Object delete_Crud_Entity_logical_ById(String typeBean, Crud_Entity entity);
-    Object delete_Crud_Entity_logical_JDBC_SP_ById(String typeBean, Crud_Entity entity);
-    Object delete_Crud_Entity_logical_JPA_SP_ById(String typeBean, Crud_Entity entity);
+    Object delete_Crud_Entity_logical_ById(String typeBean, Long id);
+    Object delete_Crud_Entity_logical_JDBC_SP_ById(String typeBean, Long id);
+    Object delete_Crud_Entity_logical_JPA_SP_ById(String typeBean, Long id);
 }
