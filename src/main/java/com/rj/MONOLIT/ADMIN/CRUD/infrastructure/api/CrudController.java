@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.rj.MONOLIT.ADMIN.CRUD.application.dto.InsertMulti_Crud_Model;
 import com.rj.MONOLIT.ADMIN.CRUD.application.dto.InsertUpdate_Crud_Model;
+import com.rj.MONOLIT.ADMIN.CRUD.application.dto.SearchRequest;
 import com.rj.MONOLIT.ADMIN.CRUD.application.service.Crud_Service;
-import com.rj.MONOLIT.ADMIN.CRUD.domain.model.Crud_Entity;
 import com.rj.MONOLIT.COMMON.utils.filesProcessor;
 import com.rj.MONOLIT.COMMON.utils.helperEndpoints;
 import java.io.IOException;
@@ -526,42 +526,27 @@ public class CrudController {
     //region find entities by names
     /*@Param List<Crud_Entity> names: lista de nombres de entidades a buscar */
     @PostMapping("{repositoryType}/find/names")
-    public ResponseEntity<?> getEntityByNames(@PathVariable String repositoryType,@RequestBody List<Crud_Entity> names) {
+    public ResponseEntity<?> getEntityByNames(@PathVariable String repositoryType,@RequestBody List<SearchRequest> names) {
         names = names.stream()
-            .filter(entity -> entity.getName() != null)
-            .map(entity -> {
-                String nameValString = helperEndpoints.sanitizeForSearch(entity.getName().trim());
-                entity.setName(nameValString);
-                return entity;
-            })
+            .filter(entity -> entity.name() != null)
             .collect(Collectors.toList());
         return crudService.find_Crud_EntityByNames(repositoryType,names)
                 .map(ResponseEntity::ok)
                 .orElseGet(ResponseEntity.notFound()::build);
     }
     @PostMapping("{repositoryType}/find/names_JDBC_SP")
-    public ResponseEntity<?> getEntity_JDBC_SP_ByNames(@PathVariable String repositoryType,@RequestBody List<Crud_Entity> names) {
+    public ResponseEntity<?> getEntity_JDBC_SP_ByNames(@PathVariable String repositoryType,@RequestBody List<SearchRequest> names) {
         names = names.stream()
-            .filter(entity -> entity.getName() != null)
-            .map(entity -> {
-                String nameValString = helperEndpoints.sanitizeForSearch(entity.getName().trim());
-                entity.setName(nameValString);
-                return entity;
-            })
+            .filter(entity -> entity.name() != null)
             .collect(Collectors.toList());
         return crudService.find_Crud_Entity_JDBC_SP_ByNames(repositoryType,names)
                 .map(ResponseEntity::ok)
                 .orElseGet(ResponseEntity.notFound()::build);
     }
     @PostMapping("{repositoryType}/find/names_JPA_SP")
-    public ResponseEntity<?> getEntity_JPA_SP_ByNames(@PathVariable String repositoryType,@RequestBody List<Crud_Entity> names) {
+    public ResponseEntity<?> getEntity_JPA_SP_ByNames(@PathVariable String repositoryType,@RequestBody List<SearchRequest> names) {
         names = names.stream()
-            .filter(entity -> entity.getName() != null)
-            .map(entity -> {
-                String nameValString = helperEndpoints.sanitizeForSearch(entity.getName().trim());
-                entity.setName(nameValString);
-                return entity;
-            })
+            .filter(entity -> entity.name() != null)
             .collect(Collectors.toList());
         return crudService.find_Crud_Entity_JPA_SP_ByNames(repositoryType,names)
                 .map(ResponseEntity::ok)
@@ -571,17 +556,17 @@ public class CrudController {
 
     //region get all entities
     @GetMapping("{repositoryType}/find/all")
-    public ResponseEntity<List<Crud_Entity>> getAllEntities(@PathVariable String repositoryType) {
+    public ResponseEntity<?> getAllEntities(@PathVariable String repositoryType) {
         return ResponseEntity.ok(crudService.findAll_Crud_entity(repositoryType));
     }
 
     @GetMapping("{repositoryType}/find/all_JDBC_SP")
-    public ResponseEntity<List<Crud_Entity>> getAllEntities_JDBC_SP(@PathVariable String repositoryType) {
+    public ResponseEntity<?> getAllEntities_JDBC_SP(@PathVariable String repositoryType) {
         return ResponseEntity.ok(crudService.findAll_Crud_entity_JDBC_SP(repositoryType));
     }
 
     @GetMapping("{repositoryType}/find/all_JPA_SP")
-    public ResponseEntity<List<Crud_Entity>> getAllEntities_JPA_SP(@PathVariable String repositoryType) {
+    public ResponseEntity<?> getAllEntities_JPA_SP(@PathVariable String repositoryType) {
         return ResponseEntity.ok(crudService.findAll_Crud_entity_JPA_SP(repositoryType));
     }
     //endregion
@@ -669,10 +654,8 @@ public class CrudController {
         if(id == null || id <= 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(helperEndpoints.buildResponse(-1, "Id a eliminar es incorrecto, Id: "+id));
         }
-        Crud_Entity entityToDelete = new Crud_Entity();
-        entityToDelete.setId(id);
         @SuppressWarnings("unchecked")
-        Map<String,Object> updatedEntity = (Map<String,Object>)crudService.delete_Crud_Entity_logical_ById(repositoryType,entityToDelete);
+        Map<String,Object> updatedEntity = (Map<String,Object>)crudService.delete_Crud_Entity_logical_ById(repositoryType,id);
         int state = (int)updatedEntity.getOrDefault("state", 0);
         return ResponseEntity.status(state == 1 ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(updatedEntity);
     }
@@ -682,10 +665,8 @@ public class CrudController {
         if(id == null || id <= 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(helperEndpoints.buildResponse(-1, "Id a eliminar es incorrecto, Id: "+id));
         }
-        Crud_Entity entityToDelete = new Crud_Entity();
-        entityToDelete.setId(id);
         @SuppressWarnings("unchecked")
-        Map<String,Object> updatedEntity = (Map<String,Object>)crudService.delete_Crud_Entity_logical_JDBC_SP_ById(repositoryType,entityToDelete);
+        Map<String,Object> updatedEntity = (Map<String,Object>)crudService.delete_Crud_Entity_logical_JDBC_SP_ById(repositoryType,id);
         int state = (int)updatedEntity.getOrDefault("state", 0);
         return ResponseEntity.status(state == 1 ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(updatedEntity);
     }
@@ -695,10 +676,8 @@ public class CrudController {
         if(id == null || id <= 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(helperEndpoints.buildResponse(-1, "Id a eliminar es incorrecto, Id: "+id));
         }
-        Crud_Entity entityToDelete = new Crud_Entity();
-        entityToDelete.setId(id);
         @SuppressWarnings("unchecked")
-        Map<String,Object> updatedEntity = (Map<String,Object>)crudService.delete_Crud_Entity_logical_JPA_SP_ById(repositoryType,entityToDelete);
+        Map<String,Object> updatedEntity = (Map<String,Object>)crudService.delete_Crud_Entity_logical_JPA_SP_ById(repositoryType,id);
         int state = (int)updatedEntity.getOrDefault("state", 0);
         return ResponseEntity.status(state == 1 ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(updatedEntity);        
     }
