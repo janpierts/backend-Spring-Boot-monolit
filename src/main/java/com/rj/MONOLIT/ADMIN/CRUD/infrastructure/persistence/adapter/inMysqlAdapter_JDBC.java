@@ -13,7 +13,6 @@ import com.rj.MONOLIT.ADMIN.CRUD.application.ports.out.Crud_RepositoryPort;
 import com.rj.MONOLIT.ADMIN.CRUD.domain.model.Crud_Entity;
 import com.rj.MONOLIT.ADMIN.CRUD.domain.readmodel.Crud_multiReadModel;
 import com.rj.MONOLIT.DBContext.JDBCConfig;
-
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;

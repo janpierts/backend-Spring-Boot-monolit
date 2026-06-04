@@ -19,7 +19,6 @@ import com.rj.MONOLIT.ADMIN.CRUD.domain.readmodel.Crud_multiReadModel;
 import com.rj.MONOLIT.ADMIN.CRUD.infrastructure.persistence.entity.CrudEntityJpa;
 import com.rj.MONOLIT.ADMIN.CRUD.infrastructure.persistence.springdata.crudSpringDataRepository;
 import com.rj.MONOLIT.DBContext.JPAConfig;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.StoredProcedureQuery;
 import jakarta.transaction.Transactional;
