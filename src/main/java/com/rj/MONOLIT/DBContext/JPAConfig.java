@@ -1,4 +1,4 @@
-package com.rj.MONOLIT.COMMON.utils.settings;
+package com.rj.MONOLIT.DBContext;
 
 import java.util.List;
 import java.util.Properties;
