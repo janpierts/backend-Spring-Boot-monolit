@@ -18,11 +18,12 @@ import com.rj.MONOLIT.ADMIN.CRUD.domain.model.Crud_Entity;
 import com.rj.MONOLIT.ADMIN.CRUD.domain.readmodel.Crud_multiReadModel;
 import com.rj.MONOLIT.ADMIN.CRUD.infrastructure.persistence.entity.CrudEntityJpa;
 import com.rj.MONOLIT.ADMIN.CRUD.infrastructure.persistence.springdata.crudSpringDataRepository;
-import com.rj.MONOLIT.COMMON.utils.settings.JPAConfig;
+import com.rj.MONOLIT.DBContext.JPAConfig;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.StoredProcedureQuery;
 import jakarta.transaction.Transactional;
-import java.sql.Timestamp; 
+import java.sql.Timestamp;
 
 @Component("inMysqlAdapter_JPA")
 public class inMysqlAdapter_JPA implements Crud_RepositoryPort {
