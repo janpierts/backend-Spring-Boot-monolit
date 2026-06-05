@@ -1,0 +1,41 @@
+package com.rj.esqueleto.admin.crud.application.ports.in;
+
+import java.util.List;
+import java.util.Optional;
+import com.rj.esqueleto.admin.crud.application.dto.InsertMulti_Crud_Model;
+import com.rj.esqueleto.admin.crud.application.dto.InsertUpdate_Crud_Model;
+import com.rj.esqueleto.admin.crud.application.dto.SearchRequest;
+import com.rj.esqueleto.admin.crud.domain.model.Crud_Entity;
+
+public interface Crud_ServicePort {
+    Object save_Crud_Entity(String typeBean,InsertUpdate_Crud_Model entity);
+    Object save_Crud_Entity_JDBC_SP(String typeBean,InsertUpdate_Crud_Model entity);
+    Object save_Crud_Entity_JPA_SP(String typeBean,InsertUpdate_Crud_Model entity);
+    Object save_multi_Crud_Entity(String typeBean,List<InsertMulti_Crud_Model> entityList);
+    Object save_multi_Crud_Entity_JDBC_SP(String typeBean,List<InsertMulti_Crud_Model> entityList);
+    Object save_multi_Crud_Entity_JPA_SP(String typeBean,List<InsertMulti_Crud_Model> entityList);
+    Object save_import_Crud_Entity(String typeBean,List<InsertMulti_Crud_Model> entityList);
+    Object save_import_Crud_Entity_JDBC_SP(String typeBean,List<InsertMulti_Crud_Model> entityList);
+    Object save_import_Crud_Entity_JPA_SP(String typeBean,List<InsertMulti_Crud_Model> entityLigst);
+    Optional<Crud_Entity> find_Crud_EntityById(String typeBean,Long id);
+    Optional<Crud_Entity> find_Crud_Entity_JDBC_SP_ById(String typeBean,Long id);
+    Optional<Crud_Entity> find_Crud_Entity_JPA_SP_ById(String typeBean,Long id);
+    Optional<Crud_Entity> find_Crud_EntityByName(String typeBean, String name);
+    Optional<Crud_Entity> find_Crud_Entity_JDBC_SP_ByName(String typeBean, String name);
+    Optional<Crud_Entity> find_Crud_Entity_JPA_SP_ByName(String typeBean, String name);
+    Optional<List<Crud_Entity>> find_Crud_EntityByNames(String typeBean, List<SearchRequest> names);
+    Optional<List<Crud_Entity>> find_Crud_Entity_JDBC_SP_ByNames(String typeBean, List<SearchRequest> names);
+    Optional<List<Crud_Entity>> find_Crud_Entity_JPA_SP_ByNames(String typeBean, List<SearchRequest> names);
+    List<Crud_Entity> findAll_Crud_entity(String typeBean);
+    List<Crud_Entity> findAll_Crud_entity_JDBC_SP(String typeBean);
+    List<Crud_Entity> findAll_Crud_entity_JPA_SP(String typeBean);
+    Object update_Crud_Entity(String typeBean,InsertUpdate_Crud_Model entity);
+    Object update_Crud_Entity_JDBC_SP(String typeBean,InsertUpdate_Crud_Model entity);
+    Object update_Crud_Entity_JPA_SP(String typeBean,InsertUpdate_Crud_Model entity);
+    void delete_Crud_Entity_phisical_ById(String typeBean,Long id);
+    void delete_Crud_Entity_phisical_JDBC_SP_ById(String typeBean,Long id);
+    void delete_Crud_Entity_phisical_JPA_SP_ById(String typeBean,Long id);
+    Object delete_Crud_Entity_logical_ById(String typeBean, Long id);
+    Object delete_Crud_Entity_logical_JDBC_SP_ById(String typeBean, Long id);
+    Object delete_Crud_Entity_logical_JPA_SP_ById(String typeBean, Long id);
+}
