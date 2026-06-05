@@ -5,8 +5,9 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.6</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<!-- <version>4.0.6</version> -->
+		<version>3.4.3</version>
+		<relativePath/>
 	</parent>
 	<groupId>com.rj</groupId>
 	<artifactId>MONOLIT</artifactId>
@@ -52,6 +53,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
         	<groupId>org.springframework.boot</groupId>
         	<artifactId>spring-boot-starter-jdbc</artifactId>
     	</dependency>
@@ -86,7 +93,7 @@
 		<dependency>
     		<groupId>com.google.guava</groupId>
     		<artifactId>guava</artifactId>
-    		<version>33.0.0-jre</version> <!-- O la última estable -->
+    		<version>33.0.0-jre</version> 
 		</dependency>
 	</dependencies>
 
@@ -96,6 +103,17 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+        	    <groupId>org.apache.maven.plugins</groupId>
+        	    <artifactId>maven-surefire-plugin</artifactId>
+        	    <version>3.5.2</version>
+        	    <configuration>
+        	        <systemPropertyVariables>
+        	            <net.bytebuddy.experimental>true</net.bytebuddy.experimental>
+        	            <spring.classformat.ignore>true</spring.classformat.ignore>
+        	        </systemPropertyVariables>
+        	    </configuration>
+        	</plugin>
 		</plugins>
 	</build>
 
