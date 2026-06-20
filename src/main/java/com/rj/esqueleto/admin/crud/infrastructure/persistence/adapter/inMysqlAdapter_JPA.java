@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -19,8 +20,8 @@ import com.rj.esqueleto.admin.crud.domain.model.Crud_Entity;
 import com.rj.esqueleto.admin.crud.domain.readmodel.Crud_multiReadModel;
 import com.rj.esqueleto.admin.crud.infrastructure.persistence.entity.CrudEntityJpa;
 import com.rj.esqueleto.admin.crud.infrastructure.persistence.springdata.crudSpringDataRepository;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.StoredProcedureQuery;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import java.sql.Timestamp;
 
@@ -34,26 +35,48 @@ public class inMysqlAdapter_JPA implements Crud_RepositoryPort {
     private String datasourcePassword;
     @Value("${spring.datasource.driver-class-name}")
     private String datasourceDriverClassName;
+
+    //#region Dynamic DataSource properties --non real / non mandatory
+    @Value("${spring.datasource1.url:#{null}}")
+    private String ds1Url;
+    @Value("${spring.datasource1.username:#{null}}")
+    private String ds1User;
+    @Value("${spring.datasource1.password:#{null}}")
+    private String ds1Pass;
+
+    @Value("${spring.datasource2.url:#{null}}")
+    private String ds2Url;
+    @Value("${spring.datasource2.username:#{null}}")
+    private String ds2User;
+    @Value("${spring.datasource2.password:#{null}}")
+    private String ds2Pass;
+
+    //#endregion
+
     private final crudSpringDataRepository jpaRepository;
     private final JPAConfig jpaConfig;
-    private volatile EntityManager entityManager; 
+    private final EntityManager entityManager; 
     
-    public inMysqlAdapter_JPA(crudSpringDataRepository jpaRepository,JPAConfig jpaConfig) {
+    public inMysqlAdapter_JPA(crudSpringDataRepository jpaRepository, JPAConfig jpaConfig, @Qualifier("entityManager") EntityManager entityManager) {
         this.jpaRepository = jpaRepository;
         this.jpaConfig = jpaConfig;
-        // this.entityManager = jpaConfig.entityManager();
+        this.entityManager = entityManager;
     }
 
-    private EntityManager getDynamicEntityManager() {
-        if (this.entityManager == null) {
-            synchronized (this) {
-                if (this.entityManager == null) {
-                    List<String> packagesToScan = List.of("com.rj.MONOLIT.ADMIN.CRUD.infrastructure.persistence.entity");
-                    this.entityManager = jpaConfig.buildEntityManager(datasourceUrl, datasourceUsername, datasourcePassword, datasourceDriverClassName, packagesToScan);
-                }
-            }
+    private EntityManager getDynamicEntityManager(String DBTarget) {
+        if(DBTarget == null || DBTarget.equalsIgnoreCase("default")){
+            return this.entityManager;
         }
-        return this.entityManager;
+        
+        List<String> packagesToScan = List.of("com.rj.esqueleto.admin.crud.infrastructure.persistence.entity");
+        switch (DBTarget.toLowerCase()) {
+            case "audit":
+                return jpaConfig.getEntityManagerForAudit(packagesToScan);
+            case "historical":
+                return jpaConfig.getEntityManagerForHistorical(packagesToScan);
+            default:
+                throw new IllegalArgumentException("Base de datos no configurada/encontrada: " + DBTarget);
+        }
     }
     //region create entity
     @Override
@@ -62,7 +85,7 @@ public class inMysqlAdapter_JPA implements Crud_RepositoryPort {
         if(existName.isPresent()){
             throw new RuntimeException("El nombre '"+entity.name()+"' ya existe en la base de datos.");
         }
-        EntityManager em = getDynamicEntityManager();
+        EntityManager em = getDynamicEntityManager("default");
         Crud_Entity newEntity = new Crud_Entity();
         try{
             newEntity.setName(entity.name());
@@ -95,7 +118,7 @@ public class inMysqlAdapter_JPA implements Crud_RepositoryPort {
         newEntity.setName(entity.name());
         newEntity.setEmail(entity.email());
         try{
-            EntityManager em = getDynamicEntityManager();
+            EntityManager em = getDynamicEntityManager("default");
             StoredProcedureQuery query = em.createNamedStoredProcedureQuery("jbAPI_crud_insert_query");
             query.setParameter("p_name", entity.name());
             query.setParameter("p_email", entity.email());
@@ -188,7 +211,7 @@ public class inMysqlAdapter_JPA implements Crud_RepositoryPort {
             .collect(Collectors.toList());
         List<Crud_multiReadModel> readmodel = new ArrayList<>();
         try {
-            EntityManager em = getDynamicEntityManager();
+            EntityManager em = getDynamicEntityManager("default");
             StoredProcedureQuery query = em.createNamedStoredProcedureQuery("jbAPI_crud_insert_multi_query");
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonObject = objectMapper.writeValueAsString(filteredEntities);
@@ -263,7 +286,7 @@ public class inMysqlAdapter_JPA implements Crud_RepositoryPort {
     @Override
     public Optional<Crud_Entity> find_Crud_Entity_JPA_SP_ById(Long id) {
         try{
-            EntityManager em = getDynamicEntityManager();
+            EntityManager em = getDynamicEntityManager("default");
             StoredProcedureQuery query = em.createNamedStoredProcedureQuery("jbAPI_crud_find_by_id_query");
             query.setParameter("p_id", id);
             @SuppressWarnings("unchecked")
@@ -280,7 +303,7 @@ public class inMysqlAdapter_JPA implements Crud_RepositoryPort {
     @Override
     public Optional<Crud_Entity> find_Crud_EntityByName(String name) {
         try{
-            EntityManager em = getDynamicEntityManager();
+            EntityManager em = getDynamicEntityManager("default");
 
             var cb = em.getCriteriaBuilder();
             var query = cb.createQuery(CrudEntityJpa.class);
@@ -301,7 +324,7 @@ public class inMysqlAdapter_JPA implements Crud_RepositoryPort {
     @Override
     public Optional<Crud_Entity> find_Crud_Entity_JPA_SP_ByName(String name) {
         try{
-            EntityManager em = getDynamicEntityManager();
+            EntityManager em = getDynamicEntityManager("default");
             StoredProcedureQuery query = em.createNamedStoredProcedureQuery("jbAPI_crud_find_by_name_query");
             query.setParameter("p_name", name);
             @SuppressWarnings("unchecked")
@@ -335,7 +358,7 @@ public class inMysqlAdapter_JPA implements Crud_RepositoryPort {
     @Override
     public Optional<List<Crud_Entity>> find_Crud_Entity_JPA_SP_ByNames(List<SearchRequest> names) {
         try {
-            EntityManager em = getDynamicEntityManager();
+            EntityManager em = getDynamicEntityManager("default");
             StoredProcedureQuery query = em.createNamedStoredProcedureQuery("jbAPI_crud_list_byNames_query");
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonObject = objectMapper.writeValueAsString(names);
@@ -370,7 +393,7 @@ public class inMysqlAdapter_JPA implements Crud_RepositoryPort {
     @Override
     public List<Crud_Entity> findAll_Crud_entity_JPA_SP() {
         try{
-            EntityManager em = getDynamicEntityManager();
+            EntityManager em = getDynamicEntityManager("default");
             StoredProcedureQuery query = em.createNamedStoredProcedureQuery("jbAPI_crud_list_query");
             @SuppressWarnings("unchecked")
             List<CrudEntityJpa> jpaEntityJpas = query.getResultList();
@@ -406,7 +429,7 @@ public class inMysqlAdapter_JPA implements Crud_RepositoryPort {
             if(!exisEntity.isPresent()){
                 throw new RuntimeException("El identificador mencionado no existe o se encuntra eliminado/anulado, Id: "+entity.id());
             }
-            EntityManager em = getDynamicEntityManager();
+            EntityManager em = getDynamicEntityManager("default");
             StoredProcedureQuery query = em.createNamedStoredProcedureQuery("jbAPI_crud_update_query");
             query.setParameter("p_id", entity.id());
             query.setParameter("p_name", entity.name());
@@ -439,7 +462,7 @@ public class inMysqlAdapter_JPA implements Crud_RepositoryPort {
     @Override
     public void delete_Crud_Entity_phisical_JPA_SP_ById(Long id) {
         try{
-            EntityManager em = getDynamicEntityManager();
+            EntityManager em = getDynamicEntityManager("default");
             StoredProcedureQuery query = em.createNamedStoredProcedureQuery("jbAPI_crud_delete_physical_query");
             query.setParameter("p_id", id);
             query.execute();
@@ -473,7 +496,7 @@ public class inMysqlAdapter_JPA implements Crud_RepositoryPort {
             if(!exisEntity.isPresent()){
                 throw new RuntimeException("El identificador mencionado no existe o se encuntra eliminado/anulado, Id: "+id);
             }
-            EntityManager em = getDynamicEntityManager();
+            EntityManager em = getDynamicEntityManager("default");
             StoredProcedureQuery query = em.createNamedStoredProcedureQuery("jbAPI_crud_delete_logical_query");
             query.setParameter("p_id", id);
             query.execute();
