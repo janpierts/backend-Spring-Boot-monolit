@@ -19,7 +19,21 @@ public class JDBCConfig {
     private String defaultPassword;
     @Value("${spring.datasource.driver-class-name}")
     private String defaultDriver;
+    //#region -> This region catch all propreties for x databases to managment EntityManager
+    @Value("${spring.datasource1.url:#{null}}")
+    private String ds1Url;
+    @Value("${spring.datasource1.username:#{null}}")
+    private String ds1User;
+    @Value("${spring.datasource1.password:#{null}}")
+    private String ds1Pass;
 
+    @Value("${spring.datasource2.url:#{null}}")
+    private String ds2Url;
+    @Value("${spring.datasource2.username:#{null}}")
+    private String ds2User;
+    @Value("${spring.datasource2.password:#{null}}")
+    private String ds2Pass;
+    //#endregion
     public DataSource createDataSource(String url, String user, String pass, String driver){
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(url != null ? url : defaultUrl);

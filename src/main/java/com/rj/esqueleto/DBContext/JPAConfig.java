@@ -1,7 +1,10 @@
 package com.rj.esqueleto.DBContext;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +27,7 @@ public class JPAConfig {
     private String defaultPassword;
     @Value("${spring.datasource.driver-class-name}")
     private String defaultDriver;
-
+    //#region -> This region catch all propreties for x databases to managment EntityManager
     @Value("${spring.datasource1.url:#{null}}")
     private String ds1Url;
     @Value("${spring.datasource1.username:#{null}}")
@@ -38,8 +41,9 @@ public class JPAConfig {
     private String ds2User;
     @Value("${spring.datasource2.password:#{null}}")
     private String ds2Pass;
-
-    public EntityManager buildEntityManager(String url, String user, String pass, String driver,List<String> packagesToScan){
+    //#endregion
+    private final Map<String, EntityManagerFactory> emfCache = new ConcurrentHashMap<>();
+    private EntityManagerFactory buildEntityManager(String url, String user, String pass, String driver,List<String> packagesToScan){
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(url != null ? url : defaultUrl);
         config.setUsername(user != null ? user : defaultUser);
@@ -61,7 +65,7 @@ public class JPAConfig {
         emfb.setJpaProperties(props);
         emfb.afterPropertiesSet();
 
-        return emfb.getObject().createEntityManager();
+        return emfb.getObject();
     }
 
     @Bean
@@ -100,12 +104,18 @@ public class JPAConfig {
     // -> Método específico para obtener un EntityManager con configuración personalizada
     public EntityManager getEntityManagerForHistorical(List<String> packagesToScan) {
         if (ds1Url == null) throw new IllegalStateException("La BD historical no está configurada.");
-        return buildEntityManager(ds1Url, ds1User, ds1Pass, defaultDriver, packagesToScan);
+        EntityManagerFactory emf = emfCache.computeIfAbsent("historical", key -> 
+            buildEntityManager(ds1Url, ds1User, ds1Pass, defaultDriver, packagesToScan)
+        );
+        return emf.createEntityManager();
     }
 
     public EntityManager getEntityManagerForAudit(List<String> packagesToScan) {
         if (ds2Url == null) throw new IllegalStateException("La BD audit no está configurada.");
-        return buildEntityManager(ds2Url, ds2User, ds2Pass, defaultDriver, packagesToScan);
+        EntityManagerFactory emf = emfCache.computeIfAbsent("audit", key -> 
+            buildEntityManager(ds2Url, ds2User, ds2Pass, defaultDriver, packagesToScan)
+        );
+        return emf.createEntityManager();
     }
 
 }
